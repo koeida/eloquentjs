@@ -165,7 +165,41 @@ function compareRobots(robot1, memory1, robot2, memory2) {
   console.log("Average steps for robot 2: " + avg(r2steps));
 }
 
-compareRobots(routeRobot, [], goalOrientedRobot, []);
+/*
+  Can you write a robot that finishes the delivery task faster than goalOrientedRobot?
+  If you observe that robot’s behavior, what obviously stupid things does it do?
+  How could those be improved?
+
+  koeida says: Well, it isn't picking the next destination based on which one has
+  the shortest route. That's a quick fix.
+
+  A more complex fix might be trying out all possible combinations of routes and seeing
+  which requires the shortest total steps.
+
+  Lets do the first fix.
+*/
+
+function getNewRoute(place, parcels) {
+  let parcelRoutes = parcels.map((p) =>  {
+    if (p.place != place) {
+      return findRoute(roadGraph, place, p.place);
+    } else {
+      return findRoute(roadGraph, place, p.address);
+    }
+  });
+  let sortedRoutes = parcelRoutes.slice(0).sort((a,b) => a.length - b.length);
+  return sortedRoutes[0];
+}
+
+function betterGoalOrientedRobot({place, parcels}, route) {
+  if (route.length == 0) {
+    route = getNewRoute(place, parcels);
+  }
+
+  return {direction: route[0], memory: route.slice(1)};
+}
+
+compareRobots(goalOrientedRobot, [], betterGoalOrientedRobot, []);
 
 //runRobot(VillageState.random(), goalOrientedRobot, []);
 
